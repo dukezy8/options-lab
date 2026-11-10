@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<title>期权策略互动分析</title>
+<style>
+:root{
+  --bg:#f7f7f4; --surface:#ffffff; --surface2:#eef2ef; --ink:#17211c; --muted:#5b6b62; --line:#dde3dd;
+  --green:#0e7a5f; --green-bg:#e6f4ee; --red:#c0392b; --red-bg:#fdecea; --amber:#b7791f; --amber-bg:#fdf3d7;
+  --blue:#1d4e6b; --shadow:0 8px 28px rgba(20,40,30,.08);
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#101613; --surface:#18201b; --surface2:#202a23; --ink:#edf2ee; --muted:#a7b5ab; --line:#2e3a32;
+  --green:#3ecf9f; --green-bg:#123128; --red:#ff7a6b; --red-bg:#3a1f1c; --amber:#f2c14e; --amber-bg:#332a12;
+  --blue:#7fc4e8; --shadow:0 8px 28px rgba(0,0,0,.35); }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.6}
+button,input{font:inherit}
+button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]){min-height:36px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:30px;line-height:1.2;margin:6px 0 8px;letter-spacing:-.02em}
+h2{font-size:20px;margin:0 0 6px;line-height:1.3}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:6px 0}
+.lead{font-size:16.5px;color:var(--muted);max-width:760px}
+.lead strong{color:var(--ink)}
+.example-bar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13.5px}
+.chip b{font-variant-numeric:tabular-nums}
+.howto{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 20px}
+.howto div{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.howto .num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:6px}
+.howto p{font-size:14px;color:var(--muted);margin:0}
+.howto strong{color:var(--ink);display:block;font-size:15px}
+
+/* strategy picker */
+.picker{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0 18px}
+.strat{ text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius);padding:12px 14px;cursor:pointer;min-height:64px}
+.strat:hover{border-color:var(--green)}
+.strat.active{border-color:var(--green);background:var(--green-bg);box-shadow:var(--shadow)}
+.strat .name{font-weight:800;font-size:15.5px;display:block;line-height:1.3}
+.strat .en{font-size:12px;color:var(--muted);letter-spacing:.02em}
+.strat .tag{font-size:11.5px;display:inline-block;margin-top:5px;padding:1px 7px;border-radius:999px;background:var(--surface2);color:var(--muted)}
+.strat.active .tag{background:var(--surface);color:var(--green)}
+
+/* lab layout */
+.lab{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.panel + .panel{margin-top:14px}
+.ctrl{margin-bottom:16px}
+.ctrl:last-child{margin-bottom:2px}
+.ctrl-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:2px}
+.ctrl-head label{font-weight:700;font-size:14.5px}
+.ctrl-val{font-weight:800;font-variant-numeric:tabular-nums;font-size:16px;color:var(--green);white-space:nowrap}
+.ctrl-desc{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+input[type="range"]{width:100%;accent-color:var(--green);height:36px;cursor:pointer}
+.scenarios{display:flex;flex-wrap:wrap;gap:7px}
+.scen{padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;font-size:13.5px;min-height:38px}
+.scen:hover{border-color:var(--green)}
+.scen:active{background:var(--green-bg)}
+
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
+.metric{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.metric .k{font-size:12.5px;color:var(--muted)}
+.metric .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.25;margin-top:2px}
+.metric .sub{font-size:12px;color:var(--muted)}
+.pos{color:var(--green)} .neg{color:var(--red)}
+
+canvas{width:100%;display:block;touch-action:none}
+#mainChart{cursor:ew-resize}
+.chart-note{font-size:12.5px;color:var(--muted);margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin:8px 0 2px}
+.legend span::before{content:"";display:inline-block;width:22px;height:0;border-top:3px solid var(--green);vertical-align:middle;margin-right:6px;border-radius:2px}
+.legend .dash::before{border-top:3px dashed #8a978e}
+.legend .spot::before{border-top:3px solid var(--amber)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12.5px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge.buy{background:var(--amber-bg);color:var(--amber)} .badge.sell{background:var(--green-bg);color:var(--green)}
+.explain{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.explain div{background:var(--surface2);border-radius:10px;padding:11px 12px;font-size:14px}
+.explain strong{display:block;margin-bottom:3px}
+.greeks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.greek{background:var(--surface2);border-radius:10px;padding:11px 12px}
+.greek .gk{font-size:13px;color:var(--muted)} .greek .gv{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.greek p{font-size:12.5px;color:var(--muted);margin:2px 0 0}
+.compare-row{display:grid;grid-template-columns:118px 1fr 86px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.compare-row:last-child{border-bottom:none}
+.bar-track{height:12px;background:var(--surface2);border-radius:999px;position:relative;overflow:hidden}
+.bar-fill{position:absolute;top:0;bottom:0;border-radius:999px}
+.compare-row .amt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.cur-strat{font-weight:800}
+details{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:4px 16px;margin-top:14px}
+summary{cursor:pointer;font-weight:700;padding:10px 0;min-height:44px;display:flex;align-items:center}
+details p,details li{font-size:14.5px;color:var(--muted)} details strong{color:var(--ink)}
+.disclaimer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:26px;padding-top:14px}
+@media (max-width:900px){
+  .picker{grid-template-columns:repeat(2,1fr)}
+  .lab{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .metrics .metric:first-child{grid-column:span 2}
+  .two,.howto,.explain,.greeks{grid-template-columns:1fr}
+  h1{font-size:26px}
+  .compare-row{grid-template-columns:96px 1fr 74px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>期权策略互动实验室</h1>
+  <p class="lead">不用先背公式。<strong>先选一个策略，再拖动现价、波动率和剩余天数</strong>，看盈亏曲线怎么变形——赚钱区间在哪、最多亏多少、时间站在你这边还是对面，一眼就明白。</p>
+
+  <div class="example-bar">
+    <span class="chip">示例标的：<b>沪深300ETF（510300）</b></span>
+    <span class="chip">开仓时价格：<b>4.000 元</b></span>
+    <span class="chip">1 张合约 = <b>10,000 份</b></span>
+    <span class="chip">盈亏单位：<b>元 / 每组策略</b></span>
+  </div>
+
+  <div class="howto">
+    <div><span class="num">1</span><strong>选策略</strong><p>下面 8 个是最常用的结构。卖方在收租，买方在买保险，先分清自己站哪边。</p></div>
+    <div><span class="num">2</span><strong>拖滑块</strong><p>拉现价模拟涨跌，拉波动率模拟恐慌或平静，拉天数看时间流逝的影响。</p></div>
+    <div><span class="num">3</span><strong>读三条曲线</strong><p>价格曲线看方向，波动率曲线看“贵不贵”，时间曲线看“拖着对谁有利”。</p></div>
+  </div>
+
+  <h2>第一步 · 选一个策略</h2>
+  <div class="picker" id="picker"></div>
+
+  <div class="lab">
+    <div>
+      <section class="panel" aria-label="参数控制">
+        <h3>第二步 · 拉动行情</h3>
+        <div class="ctrl">
+          <div class="ctrl-head"><label for="spot">当前标的价格</label><span class="ctrl-val" id="spotVal"></span></div>
+          <p class="ctrl-desc">开仓价 4.000 元。也可以直接在右侧大图上左右拖。</p>
+          <input type="range" id="spot" min="3.1" max="4.9" step="0.01" value="4.00">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head"><label for="iv">当前隐含波动率 IV</label><span class="ctrl-val" id="ivVal"></span></div>
+          <p class="ctrl-desc">市场给期权标的“贵不贵”的价。恐慌时飙升，平静时回落。</p>
+          <input type="range" id="iv" min="10" max="70" step="1" value="22">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head"><label for="days">剩余到期天数</label><span class="ctrl-val" id="daysVal"></span></div>
+          <p class="ctrl-desc">开仓时按 35 天算。拖到 0 就是到期那一天。</p>
+          <input type="range" id="days" min="0" max="35" step="1" value="35">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head"><label for="ivEntry">开仓时 IV</label><span class="ctrl-val" id="ivEntryVal"></span></div>
+          <p class="ctrl-desc">决定你开仓时付了 / 收了多少钱。卖方喜欢在它高的时候开仓。</p>
+          <input type="range" id="ivEntry" min="10" max="70" step="1" value="22">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head"><label for="otm">行权价离现价多远</label><span class="ctrl-val" id="otmVal"></span></div>
+          <p class="ctrl-desc">虚值程度。离得越远越便宜、越安全，但收的钱也越少。</p>
+          <input type="range" id="otm" min="0" max="12" step="1" value="5">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head"><label for="width">价差宽度</label><span class="ctrl-val" id="widthVal"></span></div>
+          <p class="ctrl-desc">只对价差 / 铁鹰有用：保护腿离卖出腿多远，也就是最多亏多少的“围栏”。</p>
+          <input type="range" id="width" min="0.10" max="0.40" step="0.05" value="0.20">
+        </div>
+      </section>
+
+      <section class="panel" aria-label="一键情景">
+        <h3>一键情景 · 懒得拖就点这个</h3>
+        <div class="scenarios">
+          <button class="scen" data-scen="flat">😴 横盘不动</button>
+          <button class="scen" data-scen="up">🐂 慢涨 +8%</button>
+          <button class="scen" data-scen="down">🐻 慢跌 −8%</button>
+          <button class="scen" data-scen="crash">💥 大跌 −15%＋恐慌</button>
+          <button class="scen" data-scen="rally">🚀 大涨 +15%</button>
+          <button class="scen" data-scen="calm">🌤️ 波动率回落</button>
+          <button class="scen" data-scen="week">⏳ 白白过一周</button>
+        </div>
+        <p class="chart-note">每个情景同时改价格、IV 和天数，因为真实行情里三件事总是一起来。</p>
+      </section>
+
+      <section class="panel" aria-label="希腊字母">
+        <h3>三个“仪表盘” · Greeks</h3>
+        <div class="greeks" style="grid-template-columns:1fr">
+          <div class="greek"><div class="gk">Delta · 方向仪表</div><div class="gv" id="gDelta">—</div><p>标的每涨 0.01 元，这组仓位大约赚 / 亏多少。</p></div>
+          <div class="greek"><div class="gk">Theta · 时间仪表</div><div class="gv" id="gTheta">—</div><p>什么都不动，白过一天，你大约赚 / 亏多少。卖方为正，买方为负。</p></div>
+          <div class="greek"><div class="gk">Vega · 波动率仪表</div><div class="gv" id="gVega">—</div><p>IV 每涨 1 个百分点，你大约赚 / 亏多少。</p></div>
+        </div>
+      </section>
+    </div>
+
+    <div>
+      <section class="panel" aria-label="主图">
+        <h2 id="chartTitle">到期盈亏曲线</h2>
+        <p style="color:var(--muted);font-size:14px;margin-top:0" id="chartSub"></p>
+        <div class="metrics" style="margin-top:8px">
+          <div class="metric"><div class="k">现在平仓 · 浮动盈亏</div><div class="v" id="mNow">—</div><div class="sub" id="mNowSub"></div></div>
+          <div class="metric"><div class="k">最大盈利（到期）</div><div class="v pos" id="mMaxP">—</div><div class="sub">曲线最高点</div></div>
+          <div class="metric"><div class="k">最大亏损（到期）</div><div class="v neg" id="mMaxL">—</div><div class="sub">曲线最低点</div></div>
+          <div class="metric"><div class="k">盈亏平衡点</div><div class="v" style="font-size:16px" id="mBE">—</div><div class="sub">到期价落在这之外才算赚 / 亏的分界</div></div>
+          <div class="metric"><div class="k">到期赚钱概率（估算）</div><div class="v" id="mProb">—</div><div class="sub">按当前 IV 的对数正态分布估算</div></div>
+        </div>
+        <canvas id="mainChart" height="340" aria-label="盈亏曲线图，可拖动改变现价"></canvas>
+        <div class="legend"><span>现在平仓的盈亏</span><span class="dash">到期那天的盈亏</span><span class="spot">当前价格</span></div>
+        <p class="chart-note">绿 = 赚钱区，红 = 亏钱区。在图上按住左右拖，就是把标的价格拉到那个位置，下面的数字会跟着变。</p>
+      </section>
+
+      <div class="two">
+        <section class="panel" aria-label="波动率曲线">
+          <h3>波动率曲线 · IV 变了会怎样</h3>
+          <p style="color:var(--muted);font-size:13.5px">波动率是方差开根号，市场习惯直接看 IV。价格、天数都不动，只改 IV——卖方最怕它突然飙升，买方最怕它崩塌。</p>
+          <canvas id="ivChart" height="200"></canvas>
+          <p class="chart-note" id="ivNote"></p>
+        </section>
+        <section class="panel" aria-label="时间曲线">
+          <h3>时间曲线 · 拖着不动会怎样</h3>
+          <p style="color:var(--muted);font-size:13.5px">价格和 IV 都不动，只让日子一天天过。曲线往上爬 = 时间是你的朋友；往下掉 = 每天都在交“租金”。</p>
+          <canvas id="timeChart" height="200"></canvas>
+          <p class="chart-note" id="timeNote"></p>
+        </section>
+      </div>
+
+      <section class="panel" style="margin-top:14px" aria-label="策略结构">
+        <h3 id="legsTitle">这组策略长什么样</h3>
+        <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>动作</th><th>合约</th><th class="num">行权价</th><th class="num">数量</th><th class="num">开仓价</th><th class="num">现金流</th></tr></thead>
+          <tbody id="legsBody"></tbody>
+          <tfoot><tr><td colspan="5" style="font-weight:700" id="netLabel">净现金流</td><td class="num" style="font-weight:800" id="netVal">—</td></tr></tfoot>
+        </table>
+        </div>
+        <div class="explain">
+          <div><strong>🗣️ 一句人话</strong><span id="expPlain"></span></div>
+          <div><strong>✅ 什么时候适合</strong><span id="expFit"></span></div>
+          <div><strong>⚠️ 最怕什么</strong><span id="expFear"></span></div>
+        </div>
+        <p style="font-size:14px;margin-top:12px"><strong>管理提示：</strong><span id="expManage"></span></p>
+      </section>
+
+      <section class="panel" style="margin-top:14px" aria-label="策略对比">
+        <h3>同一行情下，8 个策略谁赚谁亏？</h3>
+        <p style="color:var(--muted);font-size:13.5px">用你现在拖出来的价格、IV 和天数，把 8 个策略各算一遍“现在平仓盈亏”。行情没有好坏，只有合不合身。</p>
+        <div id="compare"></div>
+      </section>
+    </div>
+  </div>
+
+  <details>
+    <summary>新手必读：这张图到底在看什么？</summary>
+    <p><strong>横轴是到期时标的价格，纵轴是赚多少钱。</strong>曲线在 0 以上就是赚，以下就是亏。卖方策略的曲线通常是“平顶山”：中间一大片平坦的赚钱区（最多就赚收到的那笔权利金），两边或一边陡峭下滑——赚得有限，亏起来快，所以卖方靠的是胜率和仓位纪律，不是靠一把梭。</p>
+    <p><strong>实线和虚线为什么不一样？</strong>虚线是到期那天的结算结果，只有内在价值；实线是“现在就平仓”的理论价，还包含时间价值。两条线之间的距离，就是还没被时间吃掉的那部分钱——卖方等它消失，买方怕它消失。</p>
+    <p><strong>IV 为什么这么重要？</strong>同样的行权价，IV 高时权利金贵，IV 低时便宜。卖方在贵的时候卖、买方在便宜的时候买，是最朴素的道理。但贵往往是因为市场真的害怕——权利金是风险的定价，不是白送的。</p>
+    <p><strong>胜率估算别当真理。</strong>赚钱概率按对数正态分布估算，没考虑涨跌停、跳空和政策事件。A 股宽基还有几个特点：没有周合约（weeklies）、欧式行权只能到期行权、长假前后波动率会扭曲——所以这里的数字用来建立直觉，不用来下单。</p>
+  </details>
+
+  <details>
+    <summary>每个策略一句话速查</summary>
+    <p><strong>买入看涨</strong>：花小钱赌大涨，错了最多亏权利金。&nbsp;<strong>卖出看跌</strong>：收钱承诺“跌下来我接盘”，卖方收租的原型。&nbsp;<strong>牛市看跌价差</strong>：卖 put 再买一张更低的 put 当保险，亏损封顶。&nbsp;<strong>熊市看涨价差</strong>：看不涨，卖 call 再买一张更高的 call 封顶风险。&nbsp;<strong>卖出宽跨式</strong>：两边收租，赌不大涨也不大跌，最怕单边大行情。&nbsp;<strong>铁鹰</strong>：宽跨式加两道围栏，赚得少一点，亏得有底。&nbsp;<strong>买入跨式</strong>：不管方向赌大波动，怕的是横盘磨时间。&nbsp;<strong>看跌比率价差</strong>：买 1 张卖 2 张，慢跌赚钱、暴跌反亏，新手慎用。</p>
+  </details>
+
+  <p class="disclaimer">本页为教学演示：价格用 Black–Scholes 模型估算，未计手续费、滑点、保证金利息与涨跌停影响，行权价按示例参数自动生成，不对应任何真实合约。所有数字只帮你建立直觉，不构成投资建议。真实交易请以行情软件与券商结算为准。</p>
+</div>
+
+<script>
+// ---------- Black-Scholes ----------
+function normCdf(x){
+  var t = 1/(1+0.2316419*Math.abs(x));
+  var d = 0.3989422804014327*Math.exp(-x*x/2);
+  var p = d*t*(0.319381530 + t*(-0.356563782 + t*(1.781477937 + t*(-1.821255978 + t*1.330274429))));
+  return x>0 ? 1-p : p;
+}
+var R = 0.02, MULT = 10000, ENTRY_SPOT = 4.00, ENTRY_DAYS = 35;
+function bsPrice(type, S, K, iv, days){
+  if(days<=0) return type==='call' ? Math.max(S-K,0) : Math.max(K-S,0);
+  var T = days/365, vol = iv/100, sq = vol*Math.sqrt(T);
+  if(sq<=0) return type==='call' ? Math.max(S-K,0) : Math.max(K-S,0);
+  var d1 = (Math.log(S/K)+(R+vol*vol/2)*T)/sq, d2 = d1-sq;
+  if(type==='call') return S*normCdf(d1)-K*Math.exp(-R*T)*normCdf(d2);
+  return K*Math.exp(-R*T)*normCdf(-d2)-S*normCdf(-d1);
+}
+function intrinsic(type,S,K){ return type==='call'?Math.max(S-K,0):Math.max(K-S,0); }
+function roundStrike(x){ return Math.round(x/0.05)*0.05; }
+function fmt(n){ if(!isFinite(n)) return '不封顶'; var s=(n<0?'−':'+')+Math.abs(Math.round(n)).toLocaleString('zh-CN'); return s+' 元'; }
+function fmtAbs(n){ return Math.abs(Math.round(n)).toLocaleString('zh-CN')+' 元'; }
+
+// ---------- Strategies ----------
+// leg: dir +1 buy, -1 sell; qty
+function L(type,dir,strike,qty){ return {type:type,dir:dir,strike:strike,qty:qty||1}; }
+var STRATEGIES = [
+ { id:'long_call', name:'买入看涨', en:'Long Call', tag:'买方 · 看大涨',
+   legs:function(o,w){ return [L('call',1, roundStrike(ENTRY_SPOT*(1+o/2)))]; },
+   plain:'花一笔小钱买“上涨的门票”。涨对了赚几倍，涨错了最多亏门票钱。',
+   fit:'觉得马上要大涨、而且波动率还不贵的时候。慢涨不行，要涨得快、涨得猛。',
+   fear:'横盘和慢跌。哪怕最后方向看对了，拖太久时间价值流光，照样亏。',
+   manage:'买方是跟时间赛跑：涨不动、IV 往下掉，就要果断认亏，别把短线票拿成长线。' },
+ { id:'short_put', name:'卖出看跌', en:'Short Put', tag:'卖方 · 收租原型',
+   legs:function(o,w){ return [L('put',-1, roundStrike(ENTRY_SPOT*(1-o)))]; },
+   plain:'像收房租：先收一笔权利金，承诺“真跌到行权价，我按这个价接盘”。不跌穿就稳稳收租。',
+   fit:'不看大跌、甚至愿意在低位接货时。IV 越高租越贵，是卖方最经典的开局。',
+   fear:'暴跌。涨的时候最多赚租金，跌起来亏损接近于直接持股下跌，还要占保证金。',
+   manage:'卖方不赚最后一个铜板：权利金赚到一半左右就可以考虑止盈离场，把保证金腾出来。' },
+ { id:'bull_put', name:'牛市看跌价差', en:'Bull Put Spread', tag:'价差 · 温和看涨',
+   legs:function(o,w){ var k=roundStrike(ENTRY_SPOT*(1-o)); return [L('put',-1,k), L('put',1, +(k-w).toFixed(2))]; },
+   plain:'卖 put 收租的同时，花小钱买一张更低的 put 当保险。赚得少一点，但最惨亏多少开仓就知道。',
+   fit:'温和看涨或看不跌，又怕黑天鹅的时候。恐慌模式下卖方常用它替代裸卖 put，锁住尾部。',
+   fear:'跌穿保险腿行权价之后，亏损到顶为止不再扩大——怕的是判断错方向白白付了保费。',
+   manage:'因为风险封顶，可以更安心地拿，但赚到价差的一半以上同样建议止盈，别为最后一点钱多扛几天。' },
+ { id:'bear_call', name:'熊市看涨价差', en:'Bear Call Spread', tag:'价差 · 看不涨',
+   legs:function(o,w){ var k=roundStrike(ENTRY_SPOT*(1+o)); return [L('call',-1,k), L('call',1, +(k+w).toFixed(2))]; },
+   plain:'赌它涨不上去：卖一张 call 收钱，再买一张更高的 call 封住“万一暴涨”的亏损。',
+   fit:'冲高乏力、觉得上方空间有限时。注意 A 股卖 call 端历来要求更谨慎，最好只做价差不裸卖。',
+   fear:'单边大涨。好在有保护腿，最大亏损开仓时就锁定。',
+   manage:'涨势一旦确认突破，别硬扛等到期，价差止损越早成本越低。' },
+ { id:'short_strangle', name:'卖出宽跨式', en:'Short Strangle', tag:'卖方 · 双边收租',
+   legs:function(o,w){ return [L('put',-1, roundStrike(ENTRY_SPOT*(1-o))), L('call',-1, roundStrike(ENTRY_SPOT*(1+o)))]; },
+   plain:'两边收租：上面卖 call、下面卖 put，只要价格待在两条线中间，两份租金全归你。',
+   fit:'大涨大跌都觉得不会、IV 又贵的时候。震荡市是它的主场。',
+   fear:'任何一边的单边大行情。没有保护腿，亏损理论上不封顶，保证金占用也最高。',
+   fear2:'',
+   manage:'被测试的那一边别急着动，先动没被测试的那条腿往现价方向滚——这是老卖方的经典处理。一边被击穿就要认真考虑砍仓。' },
+ { id:'iron_condor', name:'铁鹰式', en:'Iron Condor', tag:'组合 · 震荡收租',
+   legs:function(o,w){ var kp=roundStrike(ENTRY_SPOT*(1-o)), kc=roundStrike(ENTRY_SPOT*(1+o)); return [L('put',-1,kp), L('put',1,+(kp-w).toFixed(2)), L('call',-1,kc), L('call',1,+(kc+w).toFixed(2))]; },
+   plain:'宽跨式外面再加两道围栏：收租少一点，但涨过头、跌过头，最多亏多少都提前算清。',
+   fit:'判断是震荡、又不想裸露尾部风险时。新手练卖方，铁鹰比裸宽跨式更友好。',
+   fear:'单边趋势行情。围栏之内是天堂，围栏之外利润会被一点点吃光直到最大亏损。',
+   manage:'四条腿手续费不便宜，别频繁折腾；赚到最大利润的 50% 左右离场通常是性价比最高的。' },
+ { id:'long_straddle', name:'买入跨式', en:'Long Straddle', tag:'买方 · 赌大波动',
+   legs:function(o,w){ var k=roundStrike(ENTRY_SPOT); return [L('call',1,k), L('put',1,k)]; },
+   plain:'方向不赌，只赌“动静要大”：同价位同时买 call 和 put，往哪边大动都赚钱。',
+   fit:'重大事件前、觉得必有一场大行情但方向不明时。前提是 IV 还没涨上天。',
+   fear:'横盘。两张票的时间价值一起流失，是所有策略里“失血”最快的之一；IV 崩塌更是双杀。',
+   manage:'事件落地、波动兑现就走，别等到期。买跨式赚的是那一下，不是陪跑。' },
+ { id:'put_ratio', name:'看跌比率价差', en:'Put Ratio Spread', tag:'进阶 · 慢跌赚钱',
+   legs:function(o,w){ var k1=roundStrike(ENTRY_SPOT*(1-o/2)), k2=roundStrike(ENTRY_SPOT*(1-o)); return [L('put',1,k1), L('put',-1,k2,2)]; },
+   plain:'买 1 张高价 put、卖 2 张低价 put。不花钱甚至倒收钱，慢跌到卖出腿附近最赚钱——但暴跌会反过来大亏。',
+   fit:'判断是阴跌、磨跌，不会有断崖时。收益曲线中间有个“甜点山峰”。',
+   fear:'暴跌。跌过山峰之后，多卖的那张 put 没有保护，亏损重新放大。新手最容易在这里翻车。',
+   manage:'这是进阶结构：开仓前必须先在图上找到暴跌时的亏损数字，能接受再谈。跌近甜点区就该考虑止盈。' },
+];
+
+// ---------- State ----------
+var state = { strat:'short_put', spot:4.00, iv:22, days:35, ivEntry:22, otm:5, width:0.20 };
+function curStrat(){ for(var i=0;i<STRATEGIES.length;i++) if(STRATEGIES[i].id===state.strat) return STRATEGIES[i]; return STRATEGIES[0]; }
+function legsOf(s){ return s.legs(state.otm/100, state.width); }
+function entryValue(legs){ var v=0; legs.forEach(function(l){ v += l.dir*l.qty*bsPrice(l.type, ENTRY_SPOT, l.strike, state.ivEntry, ENTRY_DAYS); }); return v; }
+function valueNow(legs,S,iv,days){ var v=0; legs.forEach(function(l){ v += l.dir*l.qty*bsPrice(l.type,S,l.strike,iv,days); }); return v; }
+function pnlNow(legs,S,iv,days){ return (valueNow(legs,S,iv,days)-entryValue(legs))*MULT; }
+function pnlExpiry(legs,S){ var v=0; legs.forEach(function(l){ v += l.dir*l.qty*intrinsic(l.type,S,l.strike); }); return (v-entryValue(legs))*MULT; }
+
+// metrics over grid
+function analyse(legs){
+  var minP=1e18,maxP=-1e18, bes=[], prev=null, prevS=null;
+  for(var S=0; S<=12.001; S+=0.01){
+    var p=pnlExpiry(legs,S);
+    if(p<minP)minP=p; if(p>maxP)maxP=p;
+    if(prev!==null && ((prev<0&&p>=0)||(prev>0&&p<=0))) bes.push((prevS+S)/2);
+    prev=p; prevS=S;
+  }
+  // price cannot go below 0, so only the high side can be unbounded
+  var slopeHigh = pnlExpiry(legs,12)-pnlExpiry(legs,11);
+  return {minP:minP,maxP:maxP,bes:bes,unboundedProfit:slopeHigh>50,unboundedLoss:slopeHigh<-50};
+}
+function probProfit(legs){
+  if(state.days<=0) return pnlExpiry(legs,state.spot)>0?1:0;
+  var T=state.days/365, vol=state.iv/100, mu=(R-vol*vol/2)*T, sd=vol*Math.sqrt(T);
+  var total=0, win=0, N=240;
+  for(var i=0;i<N;i++){
+    var S=2.2+(5.8-2.2)*i/(N-1);
+    var z=(Math.log(S/state.spot)-mu)/sd;
+    var pdf=Math.exp(-z*z/2)/(S*sd*Math.sqrt(2*Math.PI));
+    total+=pdf; if(pnlExpiry(legs,S)>0) win+=pdf;
+  }
+  return total>0? win/total : 0;
+}
+function greeks(legs){
+  var h=0.01, v0=valueNow(legs,state.spot,state.iv,state.days);
+  var delta=(valueNow(legs,state.spot+h,state.iv,state.days)-valueNow(legs,state.spot-h,state.iv,state.days))/(2*h)*h*MULT; // per 0.01 move
+  var theta=0;
+  if(state.days>=1) theta=(valueNow(legs,state.spot,state.iv,state.days-1)-v0)*MULT;
+  else theta=(pnlExpiry(legs,state.spot)-pnlNow(legs,state.spot,state.iv,0))*0; // at expiry theta n/a -> show —
+  var vega=(valueNow(legs,state.spot,state.iv+1,state.days)-v0)*MULT;
+  return {delta:delta,theta:theta,vega:vega,atExpiry:state.days<1};
+}
+
+// ---------- Picker ----------
+var picker=document.getElementById('picker');
+STRATEGIES.forEach(function(s){
+  var b=document.createElement('button'); b.className='strat'+(s.id===state.strat?' active':''); b.dataset.id=s.id;
+  b.innerHTML='<span class="name">'+s.name+'</span><span class="en">'+s.en+'</span><br><span class="tag">'+s.tag+'</span>';
+  b.addEventListener('click',function(){ state.strat=s.id; render(); });
+  picker.appendChild(b);
+});
+
+// ---------- Controls ----------
+function bind(id,key,fmtFn){
+  var el=document.getElementById(id);
+  el.addEventListener('input',function(){ state[key]=parseFloat(el.value); render(false); });
+}
+bind('spot','spot'); bind('iv','iv'); bind('days','days'); bind('ivEntry','ivEntry'); bind('otm','otm'); bind('width','width');
+function syncControls(){
+  document.getElementById('spot').value=state.spot;
+  document.getElementById('iv').value=state.iv;
+  document.getElementById('days').value=state.days;
+  document.getElementById('ivEntry').value=state.ivEntry;
+  document.getElementById('otm').value=state.otm;
+  document.getElementById('width').value=state.width;
+  document.getElementById('spotVal').textContent=state.spot.toFixed(2)+' 元 '+(state.spot>=ENTRY_SPOT?'▲ +':'▼ ')+(((state.spot/ENTRY_SPOT-1)*100).toFixed(1))+'%';
+  document.getElementById('ivVal').textContent=state.iv.toFixed(0)+'%';
+  document.getElementById('daysVal').textContent=state.days.toFixed(0)+' 天';
+  document.getElementById('ivEntryVal').textContent=state.ivEntry.toFixed(0)+'%';
+  document.getElementById('otmVal').textContent=state.otm.toFixed(0)+'%';
+  document.getElementById('widthVal').textContent=state.width.toFixed(2)+' 元';
+}
+var SCEN={
+  flat:{spot:4.00,iv:20,days:28}, up:{spot:4.32,iv:19,days:25}, down:{spot:3.68,iv:26,days:25},
+  crash:{spot:3.40,iv:48,days:30}, rally:{spot:4.60,iv:30,days:30}, calm:{spot:4.02,iv:14,days:30}, week:{spot:4.00,iv:21,days:28}
+};
+document.querySelectorAll('.scen').forEach(function(b){
+  b.addEventListener('click',function(){
+    var s=SCEN[b.dataset.scen]; if(!s)return;
+    if(b.dataset.scen==='week'){ state.days=Math.max(0,state.days-7); }
+    else { state.spot=s.spot; state.iv=s.iv; state.days=s.days; }
+    render();
+  });
+});
+
+// ---------- Charts ----------
+function setupCanvas(cv,h){
+  var dpr=window.devicePixelRatio||1, w=cv.clientWidth;
+  cv.width=w*dpr; cv.height=h*dpr; cv.style.height=h+'px';
+  var ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); return {ctx:ctx,w:w,h:h};
+}
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function drawAxes(ctx,w,h,pad,x0,x1,y0,y1,xFmt,yFmt){
+  var ink=cssVar('--muted'), line=cssVar('--line');
+  ctx.strokeStyle=line; ctx.fillStyle=ink; ctx.font='11px sans-serif'; ctx.lineWidth=1;
+  for(var i=0;i<=4;i++){ var yv=y0+(y1-y0)*i/4, y=pad.t+(h-pad.t-pad.b)*(1-i/4);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.textAlign='right'; ctx.fillText(yFmt(yv),pad.l-6,y+4); }
+  for(var j=0;j<=4;j++){ var xv=x0+(x1-x0)*j/4, x=pad.l+(w-pad.l-pad.r)*j/4;
+    ctx.textAlign='center'; ctx.fillText(xFmt(xv),x,h-6); }
+}
+function drawMain(){
+  var cv=document.getElementById('mainChart'); var s=setupCanvas(cv,340), ctx=s.ctx,w=s.w,h=s.h;
+  var legs=legsOf(curStrat()), pad={l:58,r:14,t:14,b:28}, x0=3.1,x1=4.9;
+  var pts=[],ptsE=[],yMin=1e18,yMax=-1e18;
+  for(var i=0;i<=180;i++){ var S=x0+(x1-x0)*i/180; var a=pnlNow(legs,S,state.iv,state.days), b=pnlExpiry(legs,S);
+    pts.push([S,a]); ptsE.push([S,b]); yMin=Math.min(yMin,a,b); yMax=Math.max(yMax,a,b); }
+  yMax=Math.max(yMax*1.15,200); yMin=Math.min(yMin*1.15,-200);
+  function X(S){return pad.l+(w-pad.l-pad.r)*(S-x0)/(x1-x0);}
+  function Y(v){return pad.t+(h-pad.t-pad.b)*(1-(v-yMin)/(yMax-yMin));}
+  drawAxes(ctx,w,h,pad,x0,x1,yMin,yMax,function(v){return v.toFixed(1);},function(v){return Math.round(v).toLocaleString();});
+  // zero line
+  ctx.strokeStyle=cssVar('--muted'); ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(pad.l,Y(0)); ctx.lineTo(w-pad.r,Y(0)); ctx.stroke(); ctx.setLineDash([]);
+  // fill profit/loss under current curve
+  pts.forEach(function(p,i){ if(i===0)return; var a=pts[i-1],b=p;
+    ctx.fillStyle=(a[1]+b[1])/2>=0?'rgba(14,122,95,.16)':'rgba(192,57,43,.14)';
+    ctx.beginPath(); ctx.moveTo(X(a[0]),Y(0)); ctx.lineTo(X(a[0]),Y(a[1])); ctx.lineTo(X(b[0]),Y(b[1])); ctx.lineTo(X(b[0]),Y(0)); ctx.closePath(); ctx.fill(); });
+  // expiry dashed
+  ctx.strokeStyle='#8a978e'; ctx.lineWidth=2; ctx.setLineDash([6,5]); ctx.beginPath();
+  ptsE.forEach(function(p,i){ i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])); }); ctx.stroke(); ctx.setLineDash([]);
+  // current solid
+  ctx.strokeStyle=cssVar('--green'); ctx.lineWidth=3; ctx.beginPath();
+  pts.forEach(function(p,i){ i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])); }); ctx.stroke();
+  // spot line + dot
+  var nowP=pnlNow(legs,state.spot,state.iv,state.days);
+  ctx.strokeStyle=cssVar('--amber'); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(state.spot),pad.t); ctx.lineTo(X(state.spot),h-pad.b); ctx.stroke();
+  ctx.fillStyle=cssVar('--amber'); ctx.beginPath(); ctx.arc(X(state.spot),Y(nowP),6,0,7); ctx.fill();
+  ctx.fillStyle=cssVar('--ink'); ctx.font='bold 12px sans-serif'; ctx.textAlign= state.spot>4.55?'right':'left';
+  ctx.fillText(state.spot.toFixed(2)+' 元 · '+(nowP>=0?'+':'−')+Math.abs(Math.round(nowP)).toLocaleString()+' 元', X(state.spot)+(state.spot>4.55?-10:10), Math.max(18,Y(nowP)-12));
+}
+function drawSmall(id, xs, ys, xFmt, yFmt, highlightX, note){
+  var cv=document.getElementById(id); var s=setupCanvas(cv,200), ctx=s.ctx,w=s.w,h=s.h;
+  var pad={l:52,r:12,t:12,b:26};
+  var yMin=Math.min.apply(null,ys.concat([0])), yMax=Math.max.apply(null,ys.concat([0]));
+  yMax=yMax*1.15+50; yMin=yMin*1.15-50;
+  var x0=xs[0], x1=xs[xs.length-1];
+  function X(v){return pad.l+(w-pad.l-pad.r)*(v-x0)/(x1-x0);}
+  function Y(v){return pad.t+(h-pad.t-pad.b)*(1-(v-yMin)/(yMax-yMin));}
+  drawAxes(ctx,w,h,pad,x0,x1,yMin,yMax,xFmt,yFmt);
+  ctx.strokeStyle=cssVar('--muted'); ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(pad.l,Y(0)); ctx.lineTo(w-pad.r,Y(0)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle=cssVar('--green'); ctx.lineWidth=2.5; ctx.beginPath();
+  xs.forEach(function(x,i){ i?ctx.lineTo(X(x),Y(ys[i])):ctx.moveTo(X(x),Y(ys[i])); }); ctx.stroke();
+  ctx.lineTo(X(x1),Y(0)); ctx.lineTo(X(x0),Y(0)); ctx.closePath(); ctx.fillStyle='rgba(14,122,95,.10)'; ctx.fill();
+  if(highlightX!==null){ ctx.strokeStyle=cssVar('--amber'); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(highlightX),pad.t); ctx.lineTo(X(highlightX),h-pad.b); ctx.stroke(); }
+}
+
+// drag on main chart
+(function(){
+  var cv=document.getElementById('mainChart'), dragging=false;
+  function setFromEvent(e){
+    var r=cv.getBoundingClientRect(), padL=58, padR=14;
+    var frac=(e.clientX-r.left-padL)/(r.width-padL-padR); frac=Math.max(0,Math.min(1,frac));
+    state.spot=+(3.1+frac*1.8).toFixed(2); render(false);
+  }
+  cv.addEventListener('pointerdown',function(e){dragging=true; cv.setPointerCapture(e.pointerId); setFromEvent(e);});
+  cv.addEventListener('pointermove',function(e){ if(dragging) setFromEvent(e); });
+  cv.addEventListener('pointerup',function(){dragging=false;});
+  cv.addEventListener('pointercancel',function(){dragging=false;});
+})();
+
+// ---------- Render ----------
+function render(sync){
+  if(sync!==false) syncControls(); else syncControls();
+  document.querySelectorAll('.strat').forEach(function(b){ b.classList.toggle('active', b.dataset.id===state.strat); });
+  var s=curStrat(), legs=legsOf(s);
+  document.getElementById('chartTitle').textContent=s.name+' · 盈亏曲线';
+  document.getElementById('chartSub').textContent=s.tag+'｜开仓价 4.000 元 · 开仓 IV '+state.ivEntry+'% · 35 天到期';
+  var an=analyse(legs), now=pnlNow(legs,state.spot,state.iv,state.days), entryV=entryValue(legs);
+  var mNow=document.getElementById('mNow'); mNow.textContent=fmt(now); mNow.className='v '+(now>=0?'pos':'neg');
+  document.getElementById('mNowSub').textContent='现价 '+state.spot.toFixed(2)+' 元 · IV '+state.iv+'% · 剩 '+state.days+' 天';
+  var elP=document.getElementById('mMaxP'), elL=document.getElementById('mMaxL');
+  elP.textContent= an.unboundedProfit ? '不封顶' : fmtAbs(an.maxP);
+  elP.nextElementSibling.textContent= an.unboundedProfit ? '涨得越多赚得越多' : '到期理论最高点';
+  elL.textContent= an.unboundedLoss ? '不封顶' : fmtAbs(an.minP);
+  elL.nextElementSibling.textContent= an.unboundedLoss ? '涨得越多亏得越多' : '到期理论最低点（已算到标的跌至 0）';
+  document.getElementById('mBE').textContent= an.bes.length? an.bes.map(function(b){return b.toFixed(2);}).join(' / ')+' 元' : '无（全程同号）';
+  var pr=probProfit(legs), mProb=document.getElementById('mProb'); mProb.textContent=(pr*100).toFixed(0)+'%'; mProb.className='v '+(pr>=0.5?'pos':'neg');
+  // legs table
+  var tb=document.getElementById('legsBody'); tb.innerHTML='';
+  legs.forEach(function(l){
+    var price=bsPrice(l.type,ENTRY_SPOT,l.strike,state.ivEntry,ENTRY_DAYS);
+    var cf=-l.dir*l.qty*price*MULT;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="badge '+(l.dir>0?'buy':'sell')+'">'+(l.dir>0?'买入':'卖出')+'</span></td><td>'+(l.type==='call'?'看涨 Call':'看跌 Put')+'</td><td class="num">'+l.strike.toFixed(2)+'</td><td class="num">'+l.qty+' 张</td><td class="num">'+price.toFixed(3)+' 元</td><td class="num">'+fmt(cf)+'</td>';
+    tb.appendChild(tr);
+  });
+  var net=-entryV*MULT;
+  document.getElementById('netLabel').textContent= net>=0?'净收权利金（先收钱）':'净付权利金（先付钱）';
+  var nv=document.getElementById('netVal'); nv.textContent=fmt(net); nv.style.color= net>=0?cssVar('--green'):cssVar('--red');
+  document.getElementById('legsTitle').textContent=s.name+' · 拆开看就是这几条腿';
+  document.getElementById('expPlain').textContent=s.plain;
+  document.getElementById('expFit').textContent=s.fit;
+  document.getElementById('expFear').textContent=s.fear;
+  document.getElementById('expManage').textContent=s.manage;
+  // greeks
+  var g=greeks(legs);
+  function setG(id,val,suffix){ var el=document.getElementById(id); el.textContent=(val>=0?'+':'−')+Math.abs(Math.round(val)).toLocaleString()+' 元'+(suffix||''); el.style.color= val>=0?cssVar('--green'):cssVar('--red'); }
+  setG('gDelta',g.delta,' / 涨0.01'); setG('gVega',g.vega,' / IV+1%');
+  if(g.atExpiry){ document.getElementById('gTheta').textContent='已到期'; document.getElementById('gTheta').style.color=cssVar('--muted'); }
+  else setG('gTheta',g.theta,' / 天');
+  // charts
+  drawMain();
+  var ivXs=[],ivYs=[]; for(var iv=5;iv<=80;iv+=2.5){ ivXs.push(iv); ivYs.push(pnlNow(legs,state.spot,iv,state.days)); }
+  drawSmall('ivChart',ivXs,ivYs,function(v){return v.toFixed(0)+'%';},function(v){return Math.round(v).toLocaleString();},state.iv);
+  document.getElementById('ivNote').textContent='现在 IV '+state.iv+'%：若恐慌把 IV 推到 50%，这组仓位浮盈亏约 '+fmt(pnlNow(legs,state.spot,50,state.days))+'；若平静回落到 14%，约 '+fmt(pnlNow(legs,state.spot,14,state.days))+'。';
+  var tXs=[],tYs=[]; for(var d=35;d>=0;d-=1.75){ tXs.push(d); tYs.push(pnlNow(legs,state.spot,state.iv,d)); } tXs.reverse(); tYs.reverse();
+  // time chart x should go 35 -> 0 left to right as time passes: use elapsed days 0..35
+  var eXs=[],eYs=[]; for(var e=0;e<=35;e+=1.75){ eXs.push(e); eYs.push(pnlNow(legs,state.spot,state.iv,Math.max(0,35-e-(35-state.days)))); }
+  // simpler: from today forward
+  var fXs=[],fYs=[]; for(var dd=state.days;dd>=0;dd-=Math.max(1,state.days/20||1)){ fXs.push(state.days-dd); fYs.push(pnlNow(legs,state.spot,state.iv,dd)); }
+  if(fXs.length<2){ fXs=[0,1]; fYs=[now, pnlExpiry(legs,state.spot)]; }
+  drawSmall('timeChart',fXs,fYs,function(v){return '+'+v.toFixed(0)+'天';},function(v){return Math.round(v).toLocaleString();},0);
+  var endP=pnlExpiry(legs,state.spot);
+  document.getElementById('timeNote').textContent='若价格停在 '+state.spot.toFixed(2)+' 元、IV 不变，拿到到期盈亏约 '+fmt(endP)+'。和现在比，时间还将带来 '+fmt(endP-now)+' 的变化。';
+  // compare
+  var comp=document.getElementById('compare'); comp.innerHTML='';
+  var rows=STRATEGIES.map(function(st){ var lg=legsOf(st); return {name:st.name,id:st.id,pnl:pnlNow(lg,state.spot,state.iv,state.days)}; });
+  var maxAbs=Math.max.apply(null, rows.map(function(r){return Math.abs(r.pnl);}).concat([1]));
+  rows.sort(function(a,b){return b.pnl-a.pnl;});
+  rows.forEach(function(r){
+    var div=document.createElement('div'); div.className='compare-row';
+    var pct=Math.abs(r.pnl)/maxAbs*100;
+    div.innerHTML='<span class="'+(r.id===state.strat?'cur-strat':'')+'">'+r.name+'</span><span class="bar-track"><span class="bar-fill" style="left:'+(r.pnl>=0?'50%':'auto')+';right:'+(r.pnl<0?'50%':'auto')+';width:'+(pct/2)+'%;background:'+(r.pnl>=0?cssVar('--green'):cssVar('--red'))+'"></span></span><span class="amt" style="color:'+(r.pnl>=0?cssVar('--green'):cssVar('--red'))+'">'+fmt(r.pnl)+'</span>';
+    comp.appendChild(div);
+  });
+}
+window.addEventListener('resize',function(){ render(false); });
+render();
+</script>
+</body>
+</html>
