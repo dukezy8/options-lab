@@ -105,6 +105,52 @@ details{background:var(--surface);border:1px solid var(--line);border-radius:var
 summary{cursor:pointer;font-weight:700;padding:10px 0;min-height:44px;display:flex;align-items:center}
 details p,details li{font-size:14.5px;color:var(--muted)} details strong{color:var(--ink)}
 .disclaimer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:26px;padding-top:14px}
+
+/* ===== tastytrade-style terminal bits ===== */
+.ticker{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;background:#0b100e;color:#eef4ef;border:1px solid #223028;border-radius:var(--radius);padding:14px 18px;margin:0 0 14px}
+.tk-sym{display:flex;flex-direction:column;line-height:1.25}
+.tk-code{font-weight:800;font-size:15px;letter-spacing:.05em}
+.tk-name{font-size:12px;color:#9db3a5}
+.tk-price{display:flex;align-items:baseline;gap:9px;font-variant-numeric:tabular-nums}
+.tk-price>span:first-child{font-size:32px;font-weight:800;line-height:1;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.tk-chg{font-weight:700;font-size:14px}
+.tk-items{display:flex;flex-wrap:wrap;gap:8px 20px;margin-left:auto}
+.tk-items div{display:flex;flex-direction:column;line-height:1.3}
+.tk-items span{font-size:11px;color:#9db3a5}
+.tk-items b{font-size:15px;font-variant-numeric:tabular-nums}
+.tk-pop{color:#2fe6a7}
+.stage{background:#0d1310;border-radius:10px;padding:10px 10px 12px;margin-top:6px}
+.stage-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:4px}
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.tog{border:1px solid #33473b;background:transparent;color:#8fa79a;border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer;min-height:32px}
+.tog.active{background:#17352a;color:#2fe6a7;border-color:#2fe6a7}
+.stage-hint{font-size:12px;color:#7d9284}
+.probe{font-size:13px;color:#c9d8ce;border-top:1px solid #223028;padding-top:8px;margin-top:6px;font-variant-numeric:tabular-nums;line-height:1.55}
+.probe b{color:#ffffff}
+.legend-dark{color:#9db3a5;margin-top:8px}
+.legend .prob::before{border-top:none;width:22px;height:10px;background:rgba(93,177,255,.65);border-radius:2px;vertical-align:middle}
+.legend .band::before{border-top:none;width:22px;height:10px;background:rgba(93,177,255,.22);border-radius:2px;vertical-align:middle}
+.strat .pop{display:block;margin-top:4px;font-size:11.5px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums}
+.range-wrap{margin:26px 2px 2px}
+.range-track{position:relative;height:34px;background:var(--surface2);border-radius:8px}
+.range-band{position:absolute;top:0;bottom:0}
+.range-band.b95{background:rgba(64,132,246,.16);border-radius:8px}
+.range-band.b68{background:rgba(64,132,246,.36);border-radius:6px}
+.range-spot{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--amber);border-radius:2px;transform:translateX(-50%);z-index:3}
+.range-spot span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:11.5px;font-weight:800;color:var(--amber);white-space:nowrap}
+.range-strike{position:absolute;top:0;bottom:0;width:2px;background:var(--muted);opacity:.55;transform:translateX(-50%)}
+.range-be{position:absolute;bottom:-5px;width:9px;height:9px;background:var(--surface);border:2.5px solid var(--ink);border-radius:50%;transform:translateX(-50%);z-index:2}
+.range-scale{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:9px;font-variant-numeric:tabular-nums}
+.prob-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.prob-card{background:var(--surface2);border-radius:10px;padding:11px 12px}
+.prob-card .k{font-size:12.5px;color:var(--muted)}
+.prob-card .v{font-size:16.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;line-height:1.35}
+.prob-card .sub{font-size:12px;color:var(--muted)}
+@media (max-width:900px){
+  .prob-cards{grid-template-columns:repeat(2,1fr)}
+  .tk-items{margin-left:0}
+  .tk-price>span:first-child{font-size:27px}
+}
 @media (max-width:900px){
   .picker{grid-template-columns:repeat(2,1fr)}
   .lab{grid-template-columns:1fr}
@@ -119,7 +165,7 @@ details p,details li{font-size:14.5px;color:var(--muted)} details strong{color:v
 <body>
 <div class="wrap">
   <h1>期权策略互动实验室</h1>
-  <p class="lead">不用先背公式。<strong>先选一个策略，再拖动现价、波动率和剩余天数</strong>，看盈亏曲线怎么变形——赚钱区间在哪、最多亏多少、时间站在你这边还是对面，一眼就明白。</p>
+  <p class="lead">不用先背公式。<strong>先选一个策略，再拖动现价、波动率和剩余天数</strong>，看盈亏曲线怎么变形。主图仿 tastytrade 的曲线视图：绿色盈亏曲线下面垫着一条<strong>蓝色概率钟形曲线</strong>——到期价格最可能落在哪、68% / 95% 概率区间有多宽，和你的赚钱区叠在一起看，一眼就明白。</p>
 
   <div class="example-bar">
     <span class="chip">示例标的：<b>沪深300ETF（510300）</b></span>
@@ -128,10 +174,22 @@ details p,details li{font-size:14.5px;color:var(--muted)} details strong{color:v
     <span class="chip">盈亏单位：<b>元 / 每组策略</b></span>
   </div>
 
+  <div class="ticker" role="region" aria-label="行情总览">
+    <div class="tk-sym"><span class="tk-code">510300</span><span class="tk-name">沪深300ETF · 示例标的</span></div>
+    <div class="tk-price"><span id="tkPrice">4.00</span><span class="tk-chg" id="tkChange">+0.0%</span></div>
+    <div class="tk-items">
+      <div><span>隐含波动率 IV</span><b id="tkIV">22%</b></div>
+      <div><span>剩余到期</span><b id="tkDays">35 天</b></div>
+      <div><span>预期波动</span><b id="tkEM">±0.00 元</b></div>
+      <div><span>68% 概率区间</span><b id="tkRange">—</b></div>
+      <div><span>到期赚钱概率 POP</span><b class="tk-pop" id="tkPOP">—</b></div>
+    </div>
+  </div>
+
   <div class="howto">
     <div><span class="num">1</span><strong>选策略</strong><p>下面 8 个是最常用的结构。卖方在收租，买方在买保险，先分清自己站哪边。</p></div>
     <div><span class="num">2</span><strong>拖滑块</strong><p>拉现价模拟涨跌，拉波动率模拟恐慌或平静，拉天数看时间流逝的影响。</p></div>
-    <div><span class="num">3</span><strong>读三条曲线</strong><p>价格曲线看方向，波动率曲线看“贵不贵”，时间曲线看“拖着对谁有利”。</p></div>
+    <div><span class="num">3</span><strong>看概率区间</strong><p>主图蓝色钟形是到期价格的概率分布，蓝带是 68% / 95% 区间。把鼠标放上去（探针）或拖动，就能读任意价位的盈亏和概率。</p></div>
   </div>
 
   <h2>第一步 · 选一个策略</h2>
@@ -208,9 +266,44 @@ details p,details li{font-size:14.5px;color:var(--muted)} details strong{color:v
           <div class="metric"><div class="k">盈亏平衡点</div><div class="v" style="font-size:16px" id="mBE">—</div><div class="sub">到期价落在这之外才算赚 / 亏的分界</div></div>
           <div class="metric"><div class="k">到期赚钱概率（估算）</div><div class="v" id="mProb">—</div><div class="sub">按当前 IV 的对数正态分布估算</div></div>
         </div>
-        <canvas id="mainChart" height="340" aria-label="盈亏曲线图，可拖动改变现价"></canvas>
-        <div class="legend"><span>现在平仓的盈亏</span><span class="dash">到期那天的盈亏</span><span class="spot">当前价格</span></div>
-        <p class="chart-note">绿 = 赚钱区，红 = 亏钱区。在图上按住左右拖，就是把标的价格拉到那个位置，下面的数字会跟着变。</p>
+        <div class="stage">
+          <div class="stage-tools">
+            <div class="toggles" role="group" aria-label="主图图层开关">
+              <button class="tog active" data-tog="prob" aria-pressed="true">概率曲线</button>
+              <button class="tog active" data-tog="b68" aria-pressed="true">68% 区间</button>
+              <button class="tog active" data-tog="b95" aria-pressed="true">95% 区间</button>
+              <button class="tog active" data-tog="expiry" aria-pressed="true">到期线</button>
+            </div>
+            <span class="stage-hint">按住拖动 = 改现价 · 移动 = 探针读数</span>
+          </div>
+          <canvas id="mainChart" height="340" aria-label="盈亏曲线与概率分布图，可拖动改变现价"></canvas>
+          <div class="probe" id="probe">把鼠标移到图上任意价位，这里会显示那个价位的盈亏与概率。</div>
+          <div class="legend legend-dark"><span>现在平仓的盈亏</span><span class="prob">到期价格概率分布</span><span class="band">概率区间带</span><span class="dash">到期那天的盈亏</span><span class="spot">当前价格</span></div>
+        </div>
+        <p class="chart-note">绿 = 赚钱区，红 = 亏钱区；蓝色钟形越高，到期落在那个价位的概率越大；灰虚线 K 是行权价，白点是盈亏平衡点。在图上按住左右拖，就是把标的价格拉到那个位置，所有数字会跟着变。</p>
+      </section>
+
+      <section class="panel" style="margin-top:14px" aria-label="概率区间">
+        <h3>概率区间 · 到期时价格最可能落在哪</h3>
+        <p style="color:var(--muted);font-size:13.5px;margin-top:0">这就是主图里蓝色钟形曲线的“标尺版”：按当前价格、IV 和剩余天数推算到期价格的概率分布。IV 越高、剩余天数越久，带子越宽——市场定价的不确定性越大，你的赚钱区被覆盖的概率也随之变。</p>
+        <div class="range-wrap">
+          <div class="range-track">
+            <div class="range-band b95" id="rb95"></div>
+            <div class="range-band b68" id="rb68"></div>
+            <div id="rbStrikes"></div>
+            <div id="rbBEs"></div>
+            <div class="range-spot" id="rbSpot"><span id="rbSpotLab"></span></div>
+          </div>
+          <div class="range-scale"><span>3.10 元</span><span>4.00 元</span><span>4.90 元</span></div>
+        </div>
+        <div class="prob-cards">
+          <div class="prob-card"><div class="k">68% 概率区间（±1σ）</div><div class="v" id="pc68">—</div><div class="sub">到期价约三分之二概率落在这里</div></div>
+          <div class="prob-card"><div class="k">95% 概率区间（±2σ）</div><div class="v" id="pc95">—</div><div class="sub">落到区间外，就是小概率大行情</div></div>
+          <div class="prob-card"><div class="k">预期波动 Expected Move</div><div class="v" id="pcEM">—</div><div class="sub">期权市场定价的到期典型波动幅度</div></div>
+          <div class="prob-card"><div class="k">到期赚钱概率 POP</div><div class="v" id="pcPOP">—</div><div class="sub">到期价落在赚钱区的概率（估算）</div></div>
+        </div>
+        <p class="chart-note" id="prNote" style="font-size:13.5px;color:var(--ink)"></p>
+        <p class="chart-note">深蓝带 = 68% 区间 · 浅蓝带 = 95% 区间 · 橙线 = 当前价 · 灰线 = 行权价 · 圆点 = 盈亏平衡点。拖动左侧的 IV 和天数滑块，看带子怎么变宽变窄。</p>
       </section>
 
       <div class="two">
@@ -258,6 +351,7 @@ details p,details li{font-size:14.5px;color:var(--muted)} details strong{color:v
     <p><strong>横轴是到期时标的价格，纵轴是赚多少钱。</strong>曲线在 0 以上就是赚，以下就是亏。卖方策略的曲线通常是“平顶山”：中间一大片平坦的赚钱区（最多就赚收到的那笔权利金），两边或一边陡峭下滑——赚得有限，亏起来快，所以卖方靠的是胜率和仓位纪律，不是靠一把梭。</p>
     <p><strong>实线和虚线为什么不一样？</strong>虚线是到期那天的结算结果，只有内在价值；实线是“现在就平仓”的理论价，还包含时间价值。两条线之间的距离，就是还没被时间吃掉的那部分钱——卖方等它消失，买方怕它消失。</p>
     <p><strong>IV 为什么这么重要？</strong>同样的行权价，IV 高时权利金贵，IV 低时便宜。卖方在贵的时候卖、买方在便宜的时候买，是最朴素的道理。但贵往往是因为市场真的害怕——权利金是风险的定价，不是白送的。</p>
+    <p><strong>蓝色钟形曲线怎么看？</strong>它是按当前 IV 和剩余天数推算的到期价格概率分布（对数正态）：峰值在现价附近，越往两边越矮。68% 区间（±1 个标准差）是“大概率就落在这里”，95% 区间（±2 个标准差）之外就是尾部行情。卖方喜欢把行权价放在钟形两翼——概率站在自己这边；但钟形是模型画的，真实世界里尾巴比它更肥，跳空和涨跌停都不在图里。</p>
     <p><strong>胜率估算别当真理。</strong>赚钱概率按对数正态分布估算，没考虑涨跌停、跳空和政策事件。A 股宽基还有几个特点：没有周合约（weeklies）、欧式行权只能到期行权、长假前后波动率会扭曲——所以这里的数字用来建立直觉，不用来下单。</p>
   </details>
 
@@ -347,7 +441,8 @@ var STRATEGIES = [
 ];
 
 // ---------- State ----------
-var state = { strat:'short_put', spot:4.00, iv:22, days:35, ivEntry:22, otm:5, width:0.20 };
+var state = { strat:'short_put', spot:4.00, iv:22, days:35, ivEntry:22, otm:5, width:0.20, showProb:true, show68:true, show95:true, showExpiry:true };
+var probePrice = null;
 function curStrat(){ for(var i=0;i<STRATEGIES.length;i++) if(STRATEGIES[i].id===state.strat) return STRATEGIES[i]; return STRATEGIES[0]; }
 function legsOf(s){ return s.legs(state.otm/100, state.width); }
 function entryValue(legs){ var v=0; legs.forEach(function(l){ v += l.dir*l.qty*bsPrice(l.type, ENTRY_SPOT, l.strike, state.ivEntry, ENTRY_DAYS); }); return v; }
@@ -380,6 +475,44 @@ function probProfit(legs){
   }
   return total>0? win/total : 0;
 }
+// ---------- Probability distribution (lognormal, tastytrade-style curve) ----------
+function normInv(p){
+  var a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239];
+  var b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572];
+  var c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783];
+  var d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+  var plow=0.02425, phigh=1-plow, q, r;
+  if(p<plow){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p>phigh){ q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  q=p-0.5; r=q*q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+function expiryDist(){
+  var T=Math.max(state.days,0)/365, vol=state.iv/100;
+  return { T:T, mu:(R-vol*vol/2)*T, sd:vol*Math.sqrt(T) };
+}
+function pdfExpiry(S){
+  var d=expiryDist(); if(d.sd<=0||S<=0) return 0;
+  var z=(Math.log(S/state.spot)-d.mu)/d.sd;
+  return Math.exp(-z*z/2)/(S*d.sd*Math.sqrt(2*Math.PI));
+}
+function quantileExpiry(p){
+  var d=expiryDist(); if(d.sd<=0) return state.spot;
+  return state.spot*Math.exp(d.mu + d.sd*normInv(p));
+}
+function expectedMove(){ var T=Math.max(state.days,0)/365; return state.spot*(state.iv/100)*Math.sqrt(T); }
+function updateProbe(){
+  var el=document.getElementById('probe'); if(!el) return;
+  var S=probePrice||state.spot, legs=legsOf(curStrat());
+  var a=pnlNow(legs,S,state.iv,state.days), b=pnlExpiry(legs,S), d=expiryDist();
+  var nearTxt='—', cumTxt='—';
+  if(d.sd>0.005){
+    nearTxt='约 '+(pdfExpiry(S)*0.1*100).toFixed(1)+'%';
+    cumTxt=(normCdf((Math.log(S/state.spot)-d.mu)/d.sd)*100).toFixed(0)+'%';
+  }
+  el.innerHTML='探针价 <b>'+S.toFixed(2)+' 元</b> · 现在平仓 <b>'+fmt(a)+'</b> · 到期 <b>'+fmt(b)+'</b> · 到期落在此价 ±0.05 内概率 <b>'+nearTxt+'</b> · 到期低于此价概率 <b>'+cumTxt+'</b>';
+}
+
 function greeks(legs){
   var h=0.01, v0=valueNow(legs,state.spot,state.iv,state.days);
   var delta=(valueNow(legs,state.spot+h,state.iv,state.days)-valueNow(legs,state.spot-h,state.iv,state.days))/(2*h)*h*MULT; // per 0.01 move
@@ -394,7 +527,7 @@ function greeks(legs){
 var picker=document.getElementById('picker');
 STRATEGIES.forEach(function(s){
   var b=document.createElement('button'); b.className='strat'+(s.id===state.strat?' active':''); b.dataset.id=s.id;
-  b.innerHTML='<span class="name">'+s.name+'</span><span class="en">'+s.en+'</span><br><span class="tag">'+s.tag+'</span>';
+  b.innerHTML='<span class="name">'+s.name+'</span><span class="en">'+s.en+'</span><br><span class="tag">'+s.tag+'</span><span class="pop"></span>';
   b.addEventListener('click',function(){ state.strat=s.id; render(); });
   picker.appendChild(b);
 });
@@ -432,6 +565,18 @@ document.querySelectorAll('.scen').forEach(function(b){
   });
 });
 
+// layer toggles on the main stage
+document.querySelectorAll('.tog').forEach(function(b){
+  b.addEventListener('click',function(){
+    var k=b.dataset.tog;
+    if(k==='prob') state.showProb=!state.showProb;
+    if(k==='b68') state.show68=!state.show68;
+    if(k==='b95') state.show95=!state.show95;
+    if(k==='expiry') state.showExpiry=!state.showExpiry;
+    render(false);
+  });
+});
+
 // ---------- Charts ----------
 function setupCanvas(cv,h){
   var dpr=window.devicePixelRatio||1, w=cv.clientWidth;
@@ -450,32 +595,77 @@ function drawAxes(ctx,w,h,pad,x0,x1,y0,y1,xFmt,yFmt){
 }
 function drawMain(){
   var cv=document.getElementById('mainChart'); var s=setupCanvas(cv,340), ctx=s.ctx,w=s.w,h=s.h;
-  var legs=legsOf(curStrat()), pad={l:58,r:14,t:14,b:28}, x0=3.1,x1=4.9;
+  var legs=legsOf(curStrat()), pad={l:58,r:14,t:16,b:28}, x0=3.1,x1=4.9;
+  var C={grid:'rgba(255,255,255,.07)',label:'#93a89b',zero:'#63766a',green:'#2fe6a7',loss:'rgba(255,107,91,.16)',win:'rgba(47,230,167,.15)',expiry:'#9fb4a6',amber:'#ffb340',pdf:'rgba(77,163,255,.30)',pdfEdge:'#5db1ff',band68:'rgba(77,163,255,.14)',band95:'rgba(77,163,255,.05)',strike:'rgba(255,255,255,.28)',probe:'rgba(255,255,255,.45)'};
   var pts=[],ptsE=[],yMin=1e18,yMax=-1e18;
   for(var i=0;i<=180;i++){ var S=x0+(x1-x0)*i/180; var a=pnlNow(legs,S,state.iv,state.days), b=pnlExpiry(legs,S);
     pts.push([S,a]); ptsE.push([S,b]); yMin=Math.min(yMin,a,b); yMax=Math.max(yMax,a,b); }
   yMax=Math.max(yMax*1.15,200); yMin=Math.min(yMin*1.15,-200);
   function X(S){return pad.l+(w-pad.l-pad.r)*(S-x0)/(x1-x0);}
   function Y(v){return pad.t+(h-pad.t-pad.b)*(1-(v-yMin)/(yMax-yMin));}
-  drawAxes(ctx,w,h,pad,x0,x1,yMin,yMax,function(v){return v.toFixed(1);},function(v){return Math.round(v).toLocaleString();});
+  // axes on dark terminal
+  ctx.strokeStyle=C.grid; ctx.fillStyle=C.label; ctx.font='11px sans-serif'; ctx.lineWidth=1;
+  for(var gi=0;gi<=4;gi++){ var yv=yMin+(yMax-yMin)*gi/4, yy=pad.t+(h-pad.t-pad.b)*(1-gi/4);
+    ctx.beginPath(); ctx.moveTo(pad.l,yy); ctx.lineTo(w-pad.r,yy); ctx.stroke();
+    ctx.textAlign='right'; ctx.fillText(Math.round(yv).toLocaleString(),pad.l-6,yy+4); }
+  for(var gj=0;gj<=4;gj++){ var xv=x0+(x1-x0)*gj/4, xx=pad.l+(w-pad.l-pad.r)*gj/4;
+    ctx.textAlign='center'; ctx.fillText(xv.toFixed(1),xx,h-6); }
+  // probability bands + bell curve
+  var dist=expiryDist(), hasDist=dist.sd>0.005, q16=0,q84=0,q025=0,q975=0;
+  if(hasDist){
+    q16=quantileExpiry(0.1587); q84=quantileExpiry(0.8413); q025=quantileExpiry(0.025); q975=quantileExpiry(0.975);
+    if(state.show95){ ctx.fillStyle=C.band95; ctx.fillRect(X(Math.max(x0,q025)),pad.t,Math.max(0,X(Math.min(x1,q975))-X(Math.max(x0,q025))),h-pad.t-pad.b); }
+    if(state.show68){ ctx.fillStyle=C.band68; ctx.fillRect(X(Math.max(x0,q16)),pad.t,Math.max(0,X(Math.min(x1,q84))-X(Math.max(x0,q16))),h-pad.t-pad.b); }
+    if(state.showProb){
+      var pdfs=[], maxPdf=0;
+      for(var pi=0; pi<=180; pi++){ var ps=x0+(x1-x0)*pi/180, pv=pdfExpiry(ps); pdfs.push([ps,pv]); if(pv>maxPdf)maxPdf=pv; }
+      var base=h-pad.b, peak=(h-pad.t-pad.b)*0.60;
+      ctx.beginPath();
+      pdfs.forEach(function(p,idx){ var px=X(p[0]), py=base-(maxPdf>0?(p[1]/maxPdf)*peak:0); idx?ctx.lineTo(px,py):ctx.moveTo(px,py); });
+      ctx.strokeStyle=C.pdfEdge; ctx.lineWidth=2; ctx.stroke();
+      ctx.lineTo(X(x1),base); ctx.lineTo(X(x0),base); ctx.closePath(); ctx.fillStyle=C.pdf; ctx.fill();
+    }
+    if(state.show68){
+      ctx.fillStyle=C.pdfEdge; ctx.font='bold 10.5px sans-serif';
+      ctx.textAlign='right'; ctx.fillText('-1\u03c3 '+q16.toFixed(2), X(q16)-4, h-pad.b-6);
+      ctx.textAlign='left'; ctx.fillText('+1\u03c3 '+q84.toFixed(2), X(q84)+4, h-pad.b-6);
+      ctx.font='11px sans-serif'; ctx.fillStyle=C.label;
+    }
+  }
   // zero line
-  ctx.strokeStyle=cssVar('--muted'); ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(pad.l,Y(0)); ctx.lineTo(w-pad.r,Y(0)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle=C.zero; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(pad.l,Y(0)); ctx.lineTo(w-pad.r,Y(0)); ctx.stroke(); ctx.setLineDash([]);
   // fill profit/loss under current curve
   pts.forEach(function(p,i){ if(i===0)return; var a=pts[i-1],b=p;
-    ctx.fillStyle=(a[1]+b[1])/2>=0?'rgba(14,122,95,.16)':'rgba(192,57,43,.14)';
+    ctx.fillStyle=(a[1]+b[1])/2>=0?C.win:C.loss;
     ctx.beginPath(); ctx.moveTo(X(a[0]),Y(0)); ctx.lineTo(X(a[0]),Y(a[1])); ctx.lineTo(X(b[0]),Y(b[1])); ctx.lineTo(X(b[0]),Y(0)); ctx.closePath(); ctx.fill(); });
   // expiry dashed
-  ctx.strokeStyle='#8a978e'; ctx.lineWidth=2; ctx.setLineDash([6,5]); ctx.beginPath();
-  ptsE.forEach(function(p,i){ i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])); }); ctx.stroke(); ctx.setLineDash([]);
+  if(state.showExpiry){
+    ctx.strokeStyle=C.expiry; ctx.lineWidth=2; ctx.setLineDash([6,5]); ctx.beginPath();
+    ptsE.forEach(function(p,i){ i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])); }); ctx.stroke(); ctx.setLineDash([]);
+  }
   // current solid
-  ctx.strokeStyle=cssVar('--green'); ctx.lineWidth=3; ctx.beginPath();
+  ctx.strokeStyle=C.green; ctx.lineWidth=3; ctx.beginPath();
   pts.forEach(function(p,i){ i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])); }); ctx.stroke();
+  // strike markers
+  var seen={};
+  legs.forEach(function(l){ if(seen[l.strike])return; seen[l.strike]=1;
+    ctx.strokeStyle=C.strike; ctx.setLineDash([3,4]); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(X(l.strike),pad.t+12); ctx.lineTo(X(l.strike),h-pad.b); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=C.label; ctx.font='10.5px sans-serif'; ctx.textAlign='center'; ctx.fillText('K '+l.strike.toFixed(2), X(l.strike), pad.t+8); ctx.font='11px sans-serif'; });
+  // breakeven dots on zero line
+  var anB=analyse(legs);
+  anB.bes.forEach(function(be){ ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(X(be),Y(0),3.5,0,7); ctx.fill(); });
+  // hover probe crosshair
+  if(probePrice && Math.abs(probePrice-state.spot)>0.004){
+    var pp=pnlNow(legs,probePrice,state.iv,state.days);
+    ctx.strokeStyle=C.probe; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(X(probePrice),pad.t); ctx.lineTo(X(probePrice),h-pad.b); ctx.stroke();
+    ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(X(probePrice),Y(pp),4.5,0,7); ctx.fill();
+  }
   // spot line + dot
   var nowP=pnlNow(legs,state.spot,state.iv,state.days);
-  ctx.strokeStyle=cssVar('--amber'); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(state.spot),pad.t); ctx.lineTo(X(state.spot),h-pad.b); ctx.stroke();
-  ctx.fillStyle=cssVar('--amber'); ctx.beginPath(); ctx.arc(X(state.spot),Y(nowP),6,0,7); ctx.fill();
-  ctx.fillStyle=cssVar('--ink'); ctx.font='bold 12px sans-serif'; ctx.textAlign= state.spot>4.55?'right':'left';
-  ctx.fillText(state.spot.toFixed(2)+' 元 · '+(nowP>=0?'+':'−')+Math.abs(Math.round(nowP)).toLocaleString()+' 元', X(state.spot)+(state.spot>4.55?-10:10), Math.max(18,Y(nowP)-12));
+  ctx.strokeStyle=C.amber; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(state.spot),pad.t); ctx.lineTo(X(state.spot),h-pad.b); ctx.stroke();
+  ctx.fillStyle=C.amber; ctx.beginPath(); ctx.arc(X(state.spot),Y(nowP),6,0,7); ctx.fill();
+  ctx.fillStyle='#eef4ef'; ctx.font='bold 12px sans-serif'; ctx.textAlign= state.spot>4.55?'right':'left';
+  ctx.fillText(state.spot.toFixed(2)+' \u5143 \u00b7 '+(nowP>=0?'+':'\u2212')+Math.abs(Math.round(nowP)).toLocaleString()+' \u5143', X(state.spot)+(state.spot>4.55?-10:10), Math.max(18,Y(nowP)-12));
 }
 function drawSmall(id, xs, ys, xFmt, yFmt, highlightX, note){
   var cv=document.getElementById(id); var s=setupCanvas(cv,200), ctx=s.ctx,w=s.w,h=s.h;
@@ -493,18 +683,19 @@ function drawSmall(id, xs, ys, xFmt, yFmt, highlightX, note){
   if(highlightX!==null){ ctx.strokeStyle=cssVar('--amber'); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(highlightX),pad.t); ctx.lineTo(X(highlightX),h-pad.b); ctx.stroke(); }
 }
 
-// drag on main chart
+// drag on main chart moves spot; plain hover drives the probe
 (function(){
   var cv=document.getElementById('mainChart'), dragging=false;
-  function setFromEvent(e){
+  function priceFromEvent(e){
     var r=cv.getBoundingClientRect(), padL=58, padR=14;
     var frac=(e.clientX-r.left-padL)/(r.width-padL-padR); frac=Math.max(0,Math.min(1,frac));
-    state.spot=+(3.1+frac*1.8).toFixed(2); render(false);
+    return +(3.1+frac*1.8).toFixed(2);
   }
-  cv.addEventListener('pointerdown',function(e){dragging=true; cv.setPointerCapture(e.pointerId); setFromEvent(e);});
-  cv.addEventListener('pointermove',function(e){ if(dragging) setFromEvent(e); });
+  cv.addEventListener('pointerdown',function(e){dragging=true; cv.setPointerCapture(e.pointerId); state.spot=priceFromEvent(e); render(false);});
+  cv.addEventListener('pointermove',function(e){ if(dragging){ state.spot=priceFromEvent(e); render(false); } else { probePrice=priceFromEvent(e); drawMain(); updateProbe(); } });
   cv.addEventListener('pointerup',function(){dragging=false;});
   cv.addEventListener('pointercancel',function(){dragging=false;});
+  cv.addEventListener('pointerleave',function(){ if(!dragging){ probePrice=null; drawMain(); updateProbe(); } });
 })();
 
 // ---------- Render ----------
@@ -547,6 +738,50 @@ function render(sync){
   setG('gDelta',g.delta,' / 涨0.01'); setG('gVega',g.vega,' / IV+1%');
   if(g.atExpiry){ document.getElementById('gTheta').textContent='已到期'; document.getElementById('gTheta').style.color=cssVar('--muted'); }
   else setG('gTheta',g.theta,' / 天');
+  // ----- tastytrade-style summary: ticker, toggles, probability range bar -----
+  document.querySelectorAll('.tog').forEach(function(b){
+    var k=b.dataset.tog, on=(k==='prob'&&state.showProb)||(k==='b68'&&state.show68)||(k==='b95'&&state.show95)||(k==='expiry'&&state.showExpiry);
+    b.classList.toggle('active',!!on); b.setAttribute('aria-pressed', on?'true':'false');
+  });
+  var em=expectedMove(), lo68=quantileExpiry(0.1587), hi68=quantileExpiry(0.8413), lo95=quantileExpiry(0.025), hi95=quantileExpiry(0.975);
+  var chgPct=(state.spot/ENTRY_SPOT-1)*100;
+  var tkP=document.getElementById('tkPrice'); tkP.textContent=state.spot.toFixed(2);
+  var tkC=document.getElementById('tkChange'); tkC.textContent=(chgPct>=0?'▲ +':'▼ ')+chgPct.toFixed(1)+'%'; tkC.style.color= chgPct>=0?'#2fe6a7':'#ff7a6b';
+  document.getElementById('tkIV').textContent=state.iv.toFixed(0)+'%';
+  document.getElementById('tkDays').textContent=state.days.toFixed(0)+' 天';
+  document.getElementById('tkEM').textContent='±'+em.toFixed(2)+' 元';
+  document.getElementById('tkRange').textContent=lo68.toFixed(2)+' – '+hi68.toFixed(2);
+  document.getElementById('tkPOP').textContent=(pr*100).toFixed(0)+'%';
+  function rpct(v){ return Math.max(0,Math.min(100,(v-3.1)/1.8*100)); }
+  var rb95=document.getElementById('rb95'); rb95.style.left=rpct(lo95)+'%'; rb95.style.width=Math.max(0,rpct(hi95)-rpct(lo95))+'%';
+  var rb68=document.getElementById('rb68'); rb68.style.left=rpct(lo68)+'%'; rb68.style.width=Math.max(0,rpct(hi68)-rpct(lo68))+'%';
+  document.getElementById('rbSpot').style.left=rpct(state.spot)+'%';
+  document.getElementById('rbSpotLab').textContent='现价 '+state.spot.toFixed(2);
+  var rsBox=document.getElementById('rbStrikes'); rsBox.innerHTML='';
+  var seenK={};
+  legs.forEach(function(l){ if(seenK[l.strike])return; seenK[l.strike]=1;
+    var sp=document.createElement('span'); sp.className='range-strike'; sp.style.left=rpct(l.strike)+'%'; sp.title='行权价 '+l.strike.toFixed(2); rsBox.appendChild(sp); });
+  var beBox=document.getElementById('rbBEs'); beBox.innerHTML='';
+  an.bes.forEach(function(be){ var sp=document.createElement('span'); sp.className='range-be'; sp.style.left=rpct(be)+'%'; sp.title='盈亏平衡 '+be.toFixed(2); beBox.appendChild(sp); });
+  document.getElementById('pc68').textContent=lo68.toFixed(2)+' – '+hi68.toFixed(2)+' 元';
+  document.getElementById('pc95').textContent=lo95.toFixed(2)+' – '+hi95.toFixed(2)+' 元';
+  document.getElementById('pcEM').textContent='±'+em.toFixed(2)+' 元（±'+(state.spot>0?(em/state.spot*100).toFixed(1):'0')+'%）';
+  var pcPOP=document.getElementById('pcPOP'); pcPOP.textContent=(pr*100).toFixed(0)+'%'; pcPOP.style.color= pr>=0.5?cssVar('--green'):cssVar('--red');
+  var noteTxt;
+  if(state.days<=0){ noteTxt='已经到期：概率分布收成一个点，盈亏只看最终价格落在哪。'; }
+  else{
+    noteTxt='按现价 '+state.spot.toFixed(2)+' 元、IV '+state.iv+'%、剩 '+state.days+' 天估算：到期价约 68% 概率落在 '+lo68.toFixed(2)+' – '+hi68.toFixed(2)+' 元，约 95% 落在 '+lo95.toFixed(2)+' – '+hi95.toFixed(2)+' 元。';
+    if(an.bes.length===1){ noteTxt+=' 这组策略的盈亏平衡点在 '+an.bes[0].toFixed(2)+' 元，'+(an.bes[0]>=lo68&&an.bes[0]<=hi68?'正好在 68% 区间里面——赚钱与否大概率就看落在平衡点哪一侧。':'在 68% 区间之外——要么大概率稳稳站在赚钱区，要么需要一波像样的行情才翻得回来，结合上面的 POP 一起看。'); }
+    else if(an.bes.length>=2){ noteTxt+=' 两个盈亏平衡点 '+an.bes.map(function(b){return b.toFixed(2);}).join(' / ')+' 元：到期价待在两点之间（或之外，看曲线形状）才赚钱，对照蓝带看覆盖了多少概率。'; }
+  }
+  document.getElementById('prNote').textContent=noteTxt;
+  updateProbe();
+  // per-strategy POP on picker cards
+  document.querySelectorAll('.strat').forEach(function(b){
+    for(var si=0;si<STRATEGIES.length;si++){ if(STRATEGIES[si].id===b.dataset.id){
+      var popEl=b.querySelector('.pop'); if(popEl) popEl.textContent='到期赚钱概率 ≈ '+(probProfit(legsOf(STRATEGIES[si]))*100).toFixed(0)+'%';
+    } }
+  });
   // charts
   drawMain();
   var ivXs=[],ivYs=[]; for(var iv=5;iv<=80;iv+=2.5){ ivXs.push(iv); ivYs.push(pnlNow(legs,state.spot,iv,state.days)); }
